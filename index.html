@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>ARC MULTICHAIN AGENT</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.10.0/ethers.umd.min.js"></script>
 
 <style>
 
@@ -13,13 +16,13 @@
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Inter,sans-serif;
+font-family:Arial;
 }
 
 body{
-background:#040916;
-color:#fff;
-padding:22px;
+background:#050b18;
+color:white;
+padding:20px;
 }
 
 .container{
@@ -28,204 +31,87 @@ margin:auto;
 }
 
 .card{
-background:#0c1323;
-border:1px solid #1b2943;
-border-radius:24px;
+background:#0d1628;
 padding:22px;
+border-radius:20px;
 margin-bottom:18px;
-box-shadow:
-0 0 30px rgba(0,255,180,.06);
-}
-
-.header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
-
-.logo{
-display:flex;
-gap:14px;
-align-items:center;
-}
-
-.logo-icon{
-width:54px;
-height:54px;
-background:
-linear-gradient(
-135deg,
-#19ff9a,
-#2b7cff
-);
-
-border-radius:16px;
-
-display:flex;
-
-justify-content:center;
-
-align-items:center;
-
-font-size:24px;
+border:1px solid #19304a;
 }
 
 .title{
-
-font-size:23px;
-
-color:#58a8ff;
-
-font-weight:700;
-
-}
-
-.wallet-pill{
-
-background:#18d78b;
-
-color:black;
-
-padding:10px 18px;
-
-border-radius:999px;
-
-font-weight:700;
-
-}
-
-.section-title{
-
-font-size:28px;
-
-margin-bottom:24px;
-
+font-size:24px;
+color:#55a8ff;
 }
 
 .label{
-
-color:#7b8da7;
-
 margin-top:18px;
-
+color:#8093b0;
 }
 
 .value{
-
 margin-top:6px;
-
 font-size:18px;
-
 }
 
 .green{
-
-color:#14ff9d;
-
-}
-
-.blue{
-
-color:#4db0ff;
-
-}
-
-.banner{
-
-background:#071d1b;
-
-border:1px solid #0c4b42;
-
-padding:18px;
-
-border-radius:18px;
-
-color:#1cffb8;
-
-margin-bottom:18px;
-
+color:#18ff9d;
 }
 
 button{
 
 width:100%;
+margin-top:18px;
 
-margin-top:24px;
-
-padding:16px;
+padding:14px;
 
 border:none;
 
-border-radius:16px;
+border-radius:14px;
+
+font-size:16px;
+
+font-weight:bold;
+
+cursor:pointer;
 
 background:
 linear-gradient(
 90deg,
 #18d78b,
-#26a9ff
+#2f90ff
 );
 
-font-size:17px;
-
-font-weight:700;
-
-cursor:pointer;
-
 }
 
-button:hover{
-
-opacity:.9;
-
-}
-
-.terminal{
-
-background:black;
-
-border-radius:18px;
-
-padding:18px;
-
-margin-top:18px;
-
-height:260px;
-
-overflow:auto;
-
-font-size:15px;
-
-line-height:1.8;
-
-}
-
-textarea{
+select{
 
 width:100%;
 
 margin-top:16px;
 
-height:110px;
+padding:14px;
 
-background:#06111d;
+background:#07111f;
 
 color:white;
 
-border:1px solid #16304b;
+border:none;
 
-padding:16px;
-
-border-radius:16px;
-
-resize:none;
+border-radius:14px;
 
 }
 
-.footer{
+.history{
 
-text-align:center;
+background:black;
 
-opacity:.6;
+padding:15px;
+
+border-radius:14px;
+
+height:220px;
+
+overflow:auto;
 
 margin-top:20px;
 
@@ -241,31 +127,9 @@ margin-top:20px;
 
 <div class="card">
 
-<div class="header">
-
-<div class="logo">
-
-<div class="logo-icon">
-⚡
-</div>
-
-<div>
-
 <div class="title">
 
 ARC MULTICHAIN AGENT
-
-</div>
-
-</div>
-
-</div>
-
-<div class="wallet-pill">
-
-0xef08...52de
-
-</div>
 
 </div>
 
@@ -275,33 +139,23 @@ ARC MULTICHAIN AGENT
 
 <div class="card">
 
-<h2>
-
-📊 Wallet Session
-
-</h2>
-
+<h2>Wallet Session</h2>
 
 <div class="label">
-
 Status
-
 </div>
 
 <div
-id="status"
-class="value green">
+class="value green"
+id="status">
 
 Disconnected
 
 </div>
 
 
-
 <div class="label">
-
-Account Address
-
+Wallet
 </div>
 
 <div
@@ -312,33 +166,27 @@ id="wallet">
 </div>
 
 
-
 <div class="label">
-
-Detected Chain ID
-
+Chain
 </div>
 
 <div
-class="value blue">
+id="chain">
 
-5042002
+—
 
 </div>
-
 
 
 <div class="label">
-
-USDC Live Balance
-
+USDC Balance
 </div>
 
 <div
-id="balance"
-class="value green">
+class="value green"
+id="balance">
 
-73.21 USDC
+—
 
 </div>
 
@@ -346,18 +194,33 @@ class="value green">
 <button
 onclick="connectWallet()">
 
-Connect Wallet
+Connect MetaMask
 
 </button>
 
-</div>
 
+<select
+id="network"
 
+onchange="switchChain()">
 
-<div class="banner">
+<option value="1">
+Ethereum
+</option>
 
-⚡ Gasless Routing Active:
-System ready for verified on-chain execution.
+<option value="8453">
+Base
+</option>
+
+<option value="137">
+Polygon
+</option>
+
+<option value="42161">
+Arbitrum
+</option>
+
+</select>
 
 </div>
 
@@ -367,44 +230,17 @@ System ready for verified on-chain execution.
 
 <h2>
 
-Talk to Agent
+Transaction History
 
 </h2>
 
 <div
-class="terminal"
-id="terminal">
+class="history"
+id="history">
 
-🤖 Agent:
-Core terminal online.
-
-<br><br>
-
-Connect wallet and send commands.
+Waiting for wallet...
 
 </div>
-
-
-<textarea
-id="command"
-
-placeholder='Example:
-Send 5 USDC to wallet'>
-</textarea>
-
-
-<button
-onclick="executeCommand()">
-
-Execute Command
-
-</button>
-
-</div>
-
-<div class="footer">
-
-ARC Stablecoin Agent
 
 </div>
 
@@ -414,11 +250,60 @@ ARC Stablecoin Agent
 
 <script>
 
-let connected=false
+let provider
+let signer
+let account
 
-function connectWallet(){
+const usdc={
 
-connected=true
+1:
+"0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+
+8453:
+"0x833589fCD6EDB6E08f4c7C32D4f71b54bdA02913",
+
+137:
+"0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
+
+42161:
+"0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+
+}
+
+async function connectWallet(){
+
+if(!window.ethereum){
+
+alert(
+"Install MetaMask"
+)
+
+return
+
+}
+
+provider=
+new ethers.BrowserProvider(
+window.ethereum
+)
+
+await provider.send(
+"eth_requestAccounts",
+[]
+)
+
+signer=
+await provider.getSigner()
+
+account=
+await signer.getAddress()
+
+document
+.getElementById(
+"wallet"
+)
+.innerHTML=
+account
 
 document
 .getElementById(
@@ -427,97 +312,177 @@ document
 .innerHTML=
 "Connected"
 
+await loadData()
+
+}
+
+
+
+async function loadData(){
+
+const net=
+await provider.getNetwork()
+
+const chain=
+Number(
+net.chainId
+)
+
 document
 .getElementById(
-"wallet"
+"chain"
 )
 .innerHTML=
-"0xef084f79208db9d282df5470640de93196dc52de"
+chain
 
-appendTerminal(
-"✅ Secure node established with wallet."
+await loadBalance(
+chain
 )
 
-}
-
-
-function appendTerminal(text){
-
-let t=
-document
-.getElementById(
-"terminal"
-)
-
-t.innerHTML+=
-"<br><br>"+text
-
-t.scrollTop=
-t.scrollHeight
+await loadHistory()
 
 }
 
 
 
-function executeCommand(){
+async function loadBalance(chain){
 
-let msg=
+if(!usdc[chain]){
+
 document
 .getElementById(
-"command"
+"balance"
+)
+.innerHTML=
+"USDC unavailable"
+
+return
+
+}
+
+const abi=[
+
+"function balanceOf(address) view returns(uint256)"
+
+]
+
+const c=
+new ethers.Contract(
+usdc[chain],
+abi,
+provider
+)
+
+const b=
+await c.balanceOf(
+account
+)
+
+document
+.getElementById(
+"balance"
+)
+.innerHTML=
+
+ethers.formatUnits(
+b,
+6
+)
+
++" USDC"
+
+}
+
+
+
+async function switchChain(){
+
+let id=
+document
+.getElementById(
+"network"
 )
 
 .value
 
-.trim()
 
+try{
 
-if(!msg){
+await window.ethereum.request({
+
+method:
+"wallet_switchEthereumChain",
+
+params:[
+
+{
+
+chainId:
+"0x"+
+Number(id)
+.toString(16)
+
+}
+
+]
+
+})
+
+loadData()
+
+}
+
+catch(e){
 
 alert(
-"Type command first"
+"Network unavailable in MetaMask"
 )
 
-return
+}
 
 }
 
 
-if(!connected){
 
-appendTerminal(
-"❌ Connect wallet first."
-)
+async function loadHistory(){
 
-return
-
-}
-
-
-appendTerminal(
-"👤 "+msg
-)
-
-
-setTimeout(()=>{
-
-appendTerminal(
-
-"🤖 Command received. Transaction simulation complete."
-
-)
-
-},600)
-
+const tx=
+await provider.getBlockNumber()
 
 document
 .getElementById(
-"command"
+"history"
 )
 
-.value=""
+.innerHTML=
+
+`
+Latest Block:
+${tx}
+
+<br><br>
+
+Wallet:
+${account}
+
+<br><br>
+
+Chain synced.
+`
 
 }
+
+
+
+window.ethereum?.on(
+"accountsChanged",
+connectWallet
+)
+
+window.ethereum?.on(
+"chainChanged",
+()=>location.reload()
+)
 
 </script>
 
