@@ -1,0 +1,32 @@
+name: Deploy ARC Testnet
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      RPC_URL: ${{ secrets.RPC_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install Dependencies
+        run: forge install
+
+      - name: Build
+        run: forge build
+
+      - name: Deploy
+        run: |
+          forge script script/Deploy.s.sol \
+          --rpc-url $RPC_URL \
+          --private-key $PRIVATE_KEY \
+          --broadcast
