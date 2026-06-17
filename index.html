@@ -76,7 +76,7 @@
                 <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800/50 flex justify-between items-center font-mono text-xs">
                     <div>
                         <span class="text-slate-400 block text-[10px]">Network Status</span>
-                        <span class="text-emerald-400 font-bold flex items-center gap-1">⚡ Stable (15 Gwei)</span>
+                        <span class="text-emerald-400 font-bold flex items-center gap-1">⚡ Stable</span>
                     </div>
                     <div class="text-right">
                         <span class="text-slate-400 block text-[10px]">Est. Cost</span>
@@ -176,7 +176,6 @@
                     document.getElementById('walletStatus').innerText = "Connected";
                     document.getElementById('walletStatus').className = "text-emerald-400 font-bold";
                     
-                    // আপডেট এড্রেস ভিউ ও কিউআর জেনারেশন
                     document.getElementById('walletAddress').innerText = userWalletAddress;
                     document.getElementById('modalAddressText').innerText = userWalletAddress;
                     generateQR(userWalletAddress);
@@ -211,26 +210,23 @@
             } catch (err) {}
         }
 
-        // ⛽ Real Gas Tracker Simulator
         async function updateGasPrice() {
             if (!provider) return;
             try {
                 const feeData = await provider.getFeeData();
                 if (feeData.gasPrice) {
                     const gwei = ethers.formatUnits(feeData.gasPrice, 'gwei');
-                    document.getElementById('gasCostDisplay').innerText = `~${parseFloat(gwei).toFixed(4)} Gwei`;
+                    document.getElementById('gasCostDisplay').innerText = `~${parseFloat(gwei).toFixed(2)} Gwei`;
                 }
             } catch (e) {}
         }
 
-        // 📋 Copy Address Feature
         function copyAddress() {
             if (!userWalletAddress) { alert("Connect wallet first!"); return; }
             navigator.clipboard.writeText(userWalletAddress);
             alert("Address copied to clipboard!");
         }
 
-        // 📷 QR Code Modal Window Toggle
         function toggleQRModal(show) {
             const modal = document.getElementById('qrModal');
             if(show) {
@@ -253,7 +249,6 @@
             });
         }
 
-        // 🧠 Prompt Templates Injection
         function useTemplate(type) {
             const input = document.getElementById('userInput');
             if (type === 'send') {
@@ -267,7 +262,6 @@
             }
         }
 
-        // 📜 Ledger Update Engine
         function addTxToLedger(amount, address, status) {
             const ledgerBody = document.getElementById('ledgerBody');
             const emptyRow = document.getElementById('emptyLedgerRow');
@@ -284,19 +278,22 @@
             ledgerBody.innerHTML = row + ledgerBody.innerHTML;
         }
 
-        // 🚀 TRANSMISSION PIPELINE
+        // 🚀 বুলেলপ্রুফ অটোমেটিক গ্যাস এস্টিমেশন ট্রান্সমিশন পাইপলাইন
         async function executeDirectTransfer(e) {
             if(e) e.preventDefault();
             const prompt = document.getElementById('userInput').value.trim();
             const consoleLog = document.getElementById('consoleLog');
 
-            if (!userWalletAddress || !signer) { alert("Please connect wallet first!"); return; }
+            if (!userWalletAddress || !signer) { 
+                consoleLog.innerHTML += `<p class="text-rose-400">[Error]: Wallet not connected.</p>`;
+                return; 
+            }
 
             const numbersFound = prompt.match(/(?:\d+(?:\.\d+)?)/);
             const addressFound = prompt.match(/0x[a-fA-F0-9]{40}/);
 
             if (!numbersFound || !addressFound) {
-                consoleLog.innerHTML += `<p class="text-rose-400">[Parsing Error]: Missing clear asset amount or 0x address.</p>`;
+                consoleLog.innerHTML += `<p class="text-rose-400">[Parsing Error]: Check prompt amount or 0x address.</p>`;
                 return;
             }
 
@@ -309,20 +306,27 @@
                 let txResponse;
 
                 if (targetContract === "NATIVE") {
-                    txResponse = await signer.sendTransaction({ to: finalAddress, value: ethers.parseEther(finalAmount.toString()) });
+                    // ম্যানুয়াল গ্যাস লিমিট সম্পূর্ণ রিমুভড (মেটামাস্ক নিজে হ্যান্ডেল করবে)
+                    txResponse = await signer.sendTransaction({ 
+                        to: finalAddress, 
+                        value: ethers.parseEther(finalAmount.toString())
+                    });
                 } else {
+                    // ERC20-এর জন্যও অটোমেটিক গ্যাস এস্টিমেশন সেট করা হলো
                     const contract = new ethers.Contract(targetContract, erc20Abi, signer);
                     txResponse = await contract.transfer(finalAddress, ethers.parseUnits(finalAmount.toString(), 6));
                 }
                 
-                consoleLog.innerHTML += `<p class="text-yellow-500">[On-Chain]: Awaiting wallet confirmation...</p>`;
+                consoleLog.innerHTML += `<p class="text-yellow-500">[On-Chain]: Confirm in your wallet...</p>`;
                 await txResponse.wait();
 
                 consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success]: Transfer settled!</p>`;
                 addTxToLedger(finalAmount, finalAddress, 'Success');
                 fetchLiveUSDCBalance();
             } catch (error) {
-                consoleLog.innerHTML += `<p class="text-red-400">[Error]: Tx compilation failed.</p>`;
+                console.error("Detailed Tx Error:", error);
+                let reason = error.reason || "Rejected or Execution Exception";
+                consoleLog.innerHTML += `<p class="text-red-400">[Error]: ${reason}</p>`;
                 addTxToLedger(finalAmount, finalAddress, 'Failed');
             }
         }
