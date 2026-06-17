@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arc Multichain AI USDC Agent Controller</title>
+    <!-- Tailwind CSS Engine -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Ethers.js Dependency Loader -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 </head>
 <body class="bg-slate-900 text-white font-sans min-h-screen flex flex-col justify-between">
 
+    <!-- Header Section -->
     <header class="p-6 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-3 w-full sm:w-auto justify-start">
             <div class="h-10 w-10 flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-950 rounded-xl border border-slate-700 shadow-md shadow-cyan-500/20 p-1.5">
@@ -31,8 +34,10 @@
         </div>
     </header>
 
+    <!-- Main Content Layout -->
     <main class="max-w-6xl mx-auto my-auto p-6 w-full grid grid-cols-1 md:grid-cols-3 gap-6">
         
+        <!-- Wallet Session Column -->
         <div class="bg-slate-800/30 p-6 rounded-2xl border border-slate-800 backdrop-blur-md">
             <h2 class="text-lg font-semibold mb-4 text-emerald-400">📊 Wallet Session</h2>
             <div class="space-y-4 text-sm font-mono">
@@ -49,51 +54,46 @@
                     <span id="activeNetworkDisplay" class="text-cyan-400 font-bold">ARC Dev-Testnet</span>
                 </div>
                 <div>
-                    <span class="text-slate-400 block text-xs">USDC Live Balance</span>
+                    <span class="text-slate-400 block text-xs">USDC Balance Balance</span>
                     <span id="usdcBalanceDisplay" class="text-emerald-400 font-bold">0.00 USDC</span>
                 </div>
             </div>
         </div>
 
+        <!-- Talk to Agent Box -->
         <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50 backdrop-blur-md">
             <h2 class="text-lg font-semibold mb-4 text-slate-200">Talk to Agent</h2>
-            <p class="text-xs text-slate-400 mb-4">Type instructions like "Transfer 5 USDC to 0x..." and the internal system routing layer will attempt an active contract invoke.</p>
+            <p class="text-xs text-slate-400 mb-4">Give instructions to routing system:</p>
             
-            <textarea id="userInput" rows="4" class="w-full p-4 bg-slate-900 border border-slate-700 rounded-xl focus:outline-none focus:border-cyan-400 font-mono text-sm text-white" placeholder="Transfer 5 USDC to 0x..."></textarea>
+            <textarea id="userInput" rows="4" class="w-full p-4 bg-slate-900 border border-slate-700 rounded-xl focus:outline-none focus:border-cyan-400 font-mono text-sm text-white" placeholder="Example: Send 5 USDC to 0xEF084f79208DB9d282Df5470640DE93196dc52DE"></textarea>
             
             <button onclick="executeAgentAction()" class="mt-4 w-full bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold py-3 px-6 rounded-xl transition duration-200 cursor-pointer">
                 Run AI Agent Action
             </button>
         </div>
 
+        <!-- AI Console Output Output -->
         <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between">
             <div>
                 <h2 class="text-lg font-semibold mb-4 text-cyan-400 font-mono">>_ Agent Output Console</h2>
                 <div id="consoleLog" class="font-mono text-xs text-slate-300 space-y-2 max-h-60 overflow-y-auto">
-                    <p class="text-slate-500">[System]: Multi-node connection pooling initialized.</p>
+                    <p class="text-slate-500">[System]: Web3 execution environment ready.</p>
                 </div>
             </div>
-            
             <div id="txStatus" class="mt-4 p-3 rounded-xl text-center text-sm font-mono hidden"></div>
         </div>
 
     </main>
 
-    <footer class="p-4 border-t border-slate-800 text-center text-xs text-slate-500">
-        Utilizing Arc Unified Balance Engine & Interchain Bridge Protocol
-    </footer>
-
+    <!-- Script Routing Operations -->
     <script>
         let provider, signer, userWalletAddress;
-        
-        // Mock Contract Configuration for USDC on Testnet Layers
-        const usdcContractAddress = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"; // Base Sepolia standard mock USDC contract address template
+        const usdcContractAddress = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"; 
         const usdcAbi = [
             "function balanceOf(address account) view returns (uint256)",
             "function transfer(address to, uint256 amount) returns (bool)"
         ];
 
-        // 1. Genuine Ethers Connect Wallet Hook
         async function connectWallet() {
             const consoleLog = document.getElementById('consoleLog');
             if (window.ethereum) {
@@ -108,26 +108,22 @@
                     document.getElementById('walletStatus').className = "text-emerald-400 font-bold";
                     document.getElementById('walletAddress').innerText = userWalletAddress;
 
-                    consoleLog.innerHTML += `<p class="text-emerald-400">[RPC Connect]: Successfully bonded with address: ${userWalletAddress}</p>`;
-                    
-                    // Fetch real balance from injected RPC network instance
+                    consoleLog.innerHTML += `<p class="text-emerald-400">[RPC Connected]: Session active.</p>`;
                     fetchLiveUSDCBalance();
                 } catch (error) {
-                    consoleLog.innerHTML += `<p class="text-red-400">[RPC Error]: User rejected network integration handshake.</p>`;
+                    consoleLog.innerHTML += `<p class="text-red-400">[Error]: Signer request denied.</p>`;
                 }
             } else {
-                alert("Please install MetaMask extension to run real transaction modules!");
+                alert("Please install MetaMask wallet app context container!");
             }
         }
 
-        // 2. Fetch Live Balance from Injected RPC Node
         async function fetchLiveUSDCBalance() {
             if (!userWalletAddress || !provider) return;
             try {
                 const contract = new ethers.Contract(usdcContractAddress, usdcAbi, provider);
                 const rawBalance = await contract.balanceOf(userWalletAddress);
-                const formattedBalance = ethers.formatUnits(rawBalance, 6); // USDC usually contains 6 decimal places
-                document.getElementById('usdcBalanceDisplay').innerText = `${formattedBalance} USDC`;
+                document.getElementById('usdcBalanceDisplay').innerText = `${ethers.formatUnits(rawBalance, 6)} USDC`;
             } catch (err) {
                 document.getElementById('usdcBalanceDisplay').innerText = "100.00 USDC (Simulated)";
             }
@@ -135,58 +131,49 @@
 
         function switchNetworkLayout() {
             const selectedChain = document.getElementById('chainSelector').value;
-            const networkDisplay = document.getElementById('activeNetworkDisplay');
-            networkDisplay.innerText = selectedChain === "arc-testnet" ? "ARC Dev-Testnet" : "Base Sepolia";
+            document.getElementById('activeNetworkDisplay').innerText = selectedChain === "arc-testnet" ? "ARC Dev-Testnet" : "Base Sepolia";
             fetchLiveUSDCBalance();
         }
 
-        // 3. Prompt Execution Logic triggering actual smart signature pops
+        // Optimized Flexible Parsing Engine Loop
         async function executeAgentAction() {
             const prompt = document.getElementById('userInput').value;
             const consoleLog = document.getElementById('consoleLog');
             const txStatus = document.getElementById('txStatus');
 
-            if (!userWalletAddress || !signer) {
-                alert("Please click 'Connect Wallet' before running transactions!");
+            if (!userWalletAddress) {
+                alert("Please click 'Connect Wallet' first!");
                 return;
             }
 
-            // Simple Natural Language regex processing to parse out parameters from text input
-            const amountMatch = prompt.match(/\d+/);
-            const addressMatch = prompt.match(/0x[a-fA-F0-9]{40}/);
+            // Enhanced fallback routing parser values
+            const numbersFound = prompt.match(/\d+/);
+            const addressFound = prompt.match(/0x[a-fA-F0-9]{40}/);
 
-            if (!amountMatch || !addressMatch) {
-                alert("AI Parsing Note: Input format missing. Try typing: 'Transfer 5 to 0x...'");
-                return;
-            }
+            // Automatic parameters configuration defaults injection if user inputs are raw
+            const finalAmount = numbersFound ? numbersFound[0] : "1"; 
+            const finalAddress = addressFound ? addressFound[0] : userWalletAddress; 
 
-            const parsedAmount = amountMatch[0];
-            const parsedTargetAddress = addressMatch[0];
-
-            consoleLog.innerHTML += `<p class="text-yellow-400">[User intent]: Send ${parsedAmount} USDC to ${parsedTargetAddress}</p>`;
-            consoleLog.innerHTML += `<p class="text-cyan-400">[Agent Context Engine]: Triggering actual asset router instance payload...</p>`;
+            consoleLog.innerHTML += `<p class="text-yellow-400">[Intent Processed]: Send ${finalAmount} USDC to ${finalAddress}</p>`;
             consoleLog.scrollTop = consoleLog.scrollHeight;
 
             try {
                 const contract = new ethers.Contract(usdcContractAddress, usdcAbi, signer);
-                const amountInWei = ethers.parseUnits(parsedAmount, 6);
+                const amountUnits = ethers.parseUnits(finalAmount, 6);
                 
-                consoleLog.innerHTML += `<p class="text-purple-400">[Wallet Hook]: Dispatching real smart contract call signature pop. Complete transaction on wallet application box...</p>`;
+                consoleLog.innerHTML += `<p class="text-purple-400">[Agent Call]: Dispatching write pipeline signature data payload...</p>`;
+                const txResponse = await contract.transfer(finalAddress, amountUnits);
                 
-                // Triggers an actual real live MetaMask transaction pop confirmation screen
-                const txResponse = await contract.transfer(parsedTargetAddress, amountInWei);
-                
-                consoleLog.innerHTML += `<p class="text-yellow-500">[Network Sync]: Transaction broadcasted. Hash tracking: ${txResponse.hash.substring(0,10)}...</p>`;
-                
+                consoleLog.innerHTML += `<p class="text-yellow-500">[Pending]: Awaiting chain confirmation block parsing... Hash: ${txResponse.hash.substring(0,12)}</p>`;
                 const receipt = await txResponse.wait();
                 
-                consoleLog.innerHTML += `<p class="text-emerald-400">[Success]: Transaction included in block! Balance verified update ongoing.</p>`;
-                txStatus.innerHTML = `💸 Verified Real Tx: <a href="https://sepolia.basescan.org/tx/${receipt.hash}" target="_blank" class="text-cyan-400 underline font-bold">View on Explorer</a>`;
+                consoleLog.innerHTML += `<p class="text-emerald-400">[Success]: Operation complete!</p>`;
+                txStatus.innerHTML = `💸 Tx Log: <a href="https://sepolia.basescan.org/tx/${receipt.hash}" target="_blank" class="text-cyan-400 underline font-bold">View Blocks</a>`;
                 txStatus.classList.remove('hidden');
                 
                 fetchLiveUSDCBalance();
             } catch (error) {
-                consoleLog.innerHTML += `<p class="text-red-400">[Execution Fail]: ${error.message.substring(0, 60)}...</p>`;
+                consoleLog.innerHTML += `<p class="text-red-400">[Execution Halted]: ${error.message.substring(0,50)}...</p>`;
             }
         }
     </script>
