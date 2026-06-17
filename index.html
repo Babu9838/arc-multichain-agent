@@ -9,7 +9,6 @@
 </head>
 <body class="bg-slate-900 text-white font-sans min-h-screen flex flex-col justify-between">
 
-    <!-- Header -->
     <header class="p-6 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-3 w-full sm:w-auto">
             <div class="h-10 w-10 flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-950 rounded-xl border border-slate-700 shadow-md">
@@ -32,10 +31,8 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="max-w-6xl mx-auto my-auto p-6 w-full grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        <!-- Wallet Status Panel -->
         <div class="bg-slate-800/30 p-6 rounded-2xl border border-slate-800 backdrop-blur-md">
             <h2 class="text-lg font-semibold mb-4 text-emerald-400">📊 Wallet Session</h2>
             <div class="space-y-4 text-sm font-mono">
@@ -58,7 +55,6 @@
             </div>
         </div>
 
-        <!-- Single Action Box -->
         <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50 backdrop-blur-md flex flex-col justify-between">
             <div>
                 <h2 class="text-lg font-semibold mb-4 text-slate-200">Talk to Agent</h2>
@@ -66,7 +62,6 @@
                 <textarea id="userInput" rows="3" class="w-full p-4 bg-slate-900 border border-slate-700 rounded-xl focus:outline-none focus:border-cyan-400 font-mono text-sm text-white" placeholder="Example: Send 2 USDC to 0xef084f79208db9d282df5470640de93196dc52de"></textarea>
             </div>
             
-            <!-- ONE-CLICK DIRECT EXECUTION BUTTON -->
             <div class="mt-4">
                 <button id="actionBtn" onclick="executeDirectTransfer(event)" class="w-full bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold py-4 px-6 rounded-xl transition duration-200 text-base font-mono tracking-wide">
                     🚀 Run AI Agent Action (One-Click)
@@ -74,7 +69,6 @@
             </div>
         </div>
 
-        <!-- Terminal Console -->
         <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between">
             <div>
                 <h2 class="text-lg font-semibold mb-4 text-cyan-400 font-mono">>_ Agent Output Console</h2>
@@ -90,7 +84,6 @@
         Utilizing Arc Unified Balance Engine & Interchain Bridge Protocol
     </footer>
 
-    <!-- JAVASCRIPT DIRECT ENGINE -->
     <script>
         let provider, signer, userWalletAddress, currentChainId;
 
@@ -173,10 +166,10 @@
             }
         }
 
-        // 🌟 ONE-CLICK SINGLE PIPELINE (Saves Time & Prevents Revert/Deduction Errors)
+        // 🌟 ONE-CLICK SINGLE PIPELINE (UPDATED WITH EXPLICIT ERROR CAPTURING)
         async function executeDirectTransfer(e) {
             if(e) e.preventDefault();
-            const prompt = document.getElementById('userInput').value.toLowerCase();
+            const prompt = document.getElementById('userInput').value.trim();
             const consoleLog = document.getElementById('consoleLog');
             const txStatus = document.getElementById('txStatus');
 
@@ -185,11 +178,16 @@
                 return;
             }
 
-            const numbersFound = prompt.match(/\d+/);
+            // High intelligence regex extractor for handling varied formats
+            const numbersFound = prompt.match(/(?:\d+(?:\.\d+)?)/);
             const addressFound = prompt.match(/0x[a-fA-F0-9]{40}/);
 
-            if (!numbersFound || !addressFound) {
-                alert("Parsing error: Make sure to type an amount and a valid 0x recipient address!");
+            if (!numbersFound) {
+                consoleLog.innerHTML += `<p class="text-rose-400">[Parsing Error]: Could not extract amount from your text!</p>`;
+                return;
+            }
+            if (!addressFound) {
+                consoleLog.innerHTML += `<p class="text-rose-400">[Parsing Error]: Could not find a valid 0x wallet address!</p>`;
                 return;
             }
 
@@ -210,27 +208,26 @@
                 const amountUnits = ethers.parseUnits(finalAmount.toString(), decimals);
                 const tokenContractInstance = new ethers.Contract(targetContract, usdcAbi, signer);
 
-                consoleLog.innerHTML += `<p class="text-cyan-400">[Pipeline]: Dispatching direct execution payload to ${finalAddress}...</p>`;
+                consoleLog.innerHTML += `<p class="text-cyan-400">[Pipeline]: Dispatching transaction of ${finalAmount} USDC to ${finalAddress.substring(0,6)}...</p>`;
                 consoleLog.scrollTop = consoleLog.scrollHeight;
 
-                // Directly calling the standard ERC20 transfer method
                 const transferTx = await tokenContractInstance.transfer(finalAddress, amountUnits);
-                consoleLog.innerHTML += `<p class="text-yellow-500">[On-Chain]: Transacting funds... Pending block confirmation.</p>`;
+                consoleLog.innerHTML += `<p class="text-yellow-500">[On-Chain]: Pending wallet confirmation or block approval...</p>`;
                 consoleLog.scrollTop = consoleLog.scrollHeight;
                 
                 await transferTx.wait();
 
-                consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success]: ${finalAmount} USDC cleared and deducted from balance ledger!</p>`;
+                consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success]: ${finalAmount} USDC sent and subtracted from balance ledger!</p>`;
                 txStatus.innerHTML = `Bridge Extraction Successful.`;
                 txStatus.classList.remove('hidden');
                 txStatus.className = "mt-4 p-3 rounded-xl text-center text-sm font-mono bg-emerald-950/40 border border-emerald-800 text-emerald-400";
                 consoleLog.scrollTop = consoleLog.scrollHeight;
 
-                // Instantly re-fetch the new remaining balance from blockchain
                 setTimeout(fetchLiveUSDCBalance, 1000);
 
             } catch (error) {
-                consoleLog.innerHTML += `<p class="text-red-400">[Error]: Direct execution failed or rejected by user.</p>`;
+                // If wallet rejects, log the specific block error to console
+                consoleLog.innerHTML += `<p class="text-red-400">[Blockchain Error]: ${error.message ? error.message.substring(0, 60) : "Transaction rejected or insufficient funds."}</p>`;
                 consoleLog.scrollTop = consoleLog.scrollHeight;
             }
         }
