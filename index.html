@@ -6,23 +6,23 @@
     <title>Arc Multichain AI USDC Agent Controller</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
-    <style>
-        /* লোগো যাতে কোনোভাবেই ব্লার বা ফেটে না যায় তার জন্য বিশেষ ইঞ্জিন রেন্ডারিং */
-        .crisp-logo {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-            image-rendering: pixelated;
-        }
-    </style>
 </head>
 <body class="bg-slate-900 text-white font-sans min-h-screen flex flex-col justify-between">
 
     <!-- Header -->
     <header class="p-6 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-3 w-full sm:w-auto">
-            <!-- বুলেলপ্রুফ লোগো কন্টেইনার: লোগোকে ফাটতে দেবে না এবং অরিজিনাল সাইজে রাখবে -->
-            <div class="h-10 w-10 flex items-center justify-center bg-[#0d1527] rounded-xl border border-slate-700/50 p-1 flex-shrink-0">
-                <img src="1000227687.jpg" alt="Logo" class="max-w-full max-h-full object-contain crisp-logo">
+            <!-- বুলেটপ্রুফ ভেক্টর লোগো: এটি কখনোই ফাটবে না বা ঝাপসা হবে না -->
+            <div class="h-10 w-10 flex items-center justify-center bg-gradient-to-b from-[#0d1527] to-[#070b14] rounded-xl border border-slate-700/50 p-1.5 flex-shrink-0 shadow-inner">
+                <svg viewBox="0 0 100 100" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#ffffff"/>
+                            <stop offset="100%" stop-color="#cbd5e1"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M50 12C32 12 21 38 19 82C27 80 34 76 39 71C39 65 42 62 48 62H71C76 62 79 72 81 83C80 43 68 12 50 12ZM50 25C58 25 66 43 68 53H32C34 43 42 25 50 25Z" fill="url(#logoGrad)"/>
+                </svg>
             </div>
             <h1 class="text-xl font-bold tracking-wider text-cyan-400">ARC MULTICHAIN AGENT</h1>
         </div>
@@ -39,7 +39,7 @@
         </div>
     </header>
 
-    <!-- Main Content (বাকি সবকিছু হুবহু এক ও সুরক্ষিত রাখা হয়েছে) -->
+    <!-- Main Content (বাকি সবকিছু ১০০% একই রাখা হয়েছে) -->
     <main class="max-w-6xl mx-auto my-auto p-6 w-full grid grid-cols-1 md:grid-cols-3 gap-6">
         
         <div class="bg-slate-800/30 p-6 rounded-2xl border border-slate-800 backdrop-blur-md">
@@ -87,8 +87,12 @@
         </div>
     </main>
 
+    <footer class="p-4 border-t border-slate-800 text-center text-xs text-slate-500">
+        Utilizing Arc Unified Balance Engine & Interchain Bridge Protocol
+    </footer>
+
     <script>
-        // (বাকি জাভাস্ক্রিপ্ট লজিক সম্পূর্ণ অপরিবর্তিত রাখা হয়েছে যাতে কোনো এরর না আসে)
+        // জাভাস্ক্রিপ্ট লজিক সম্পূর্ণ অক্ষুণ্ণ ও অপরিবর্তিত রাখা হয়েছে
         let provider, signer, userWalletAddress, currentChainId;
         const tokenContracts = { "5042002": "NATIVE", "11155111": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", "421614": "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d", "DEFAULT_ARC": "NATIVE" };
         const erc20Abi = ["function balanceOf(address account) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)"];
