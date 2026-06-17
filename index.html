@@ -73,7 +73,7 @@
             <div>
                 <h2 class="text-lg font-semibold mb-4 text-cyan-400 font-mono">>_ Agent Output Console</h2>
                 <div id="consoleLog" class="font-mono text-xs text-slate-300 space-y-2 max-h-60 overflow-y-auto">
-                    <p class="text-slate-500">[System]: GitHub Pages Secure Engine Ready.</p>
+                    <p class="text-slate-500">[System]: GitHub Pages Native Engine Sync.</p>
                 </div>
             </div>
             <div id="txStatus" class="mt-4 p-3 rounded-xl text-center text-sm font-mono hidden"></div>
@@ -88,16 +88,13 @@
         let provider, signer, userWalletAddress, currentChainId;
 
         const tokenContracts = {
-            "5042002": "0x3600000000000000000000000000000000000000",   // ARC Native USDC
-            "11155111": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",  // Sepolia USDC
+            "5042002": "NATIVE",                                       // ARC Native USDC Engine
+            "11155111": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",  // Sepolia USDC (Standard ERC20)
             "421614": "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d",    // Arbitrum Sepolia USDC
-            "DEFAULT_ARC": "0x3600000000000000000000000000000000000000"
+            "DEFAULT_ARC": "NATIVE"
         };
 
-        const usdcAbi = [
-            "function balanceOf(address account) view returns (uint256)",
-            "function transfer(address to, uint256 amount) returns (bool)"
-        ];
+        const erc20Abi = ["function balanceOf(address account) view returns (uint256)", "function transfer(address to, uint256 amount) returns (bool)"];
 
         function getWalletProvider() {
             return window.ethereum || window.braveWallet || null;
@@ -124,10 +121,10 @@
                     currentChainId = network.chainId.toString();
                     document.getElementById('activeNetworkDisplay').innerText = `Chain ID: ${currentChainId}`;
                     
-                    consoleLog.innerHTML += `<p class="text-emerald-400">[Wallet]: Account synced.</p>`;
+                    consoleLog.innerHTML += `<p class="text-emerald-400">[Wallet]: Account synced successfully.</p>`;
                     fetchLiveUSDCBalance();
                 } catch (error) {
-                    consoleLog.innerHTML += `<p class="text-red-400">[Error]: Handshake denied.</p>`;
+                    consoleLog.innerHTML += `<p class="text-red-400">[Error]: Secure handshake denied.</p>`;
                 }
             } else {
                 alert("No Web3 Wallet detected!");
@@ -149,24 +146,23 @@
         async function fetchLiveUSDCBalance() {
             if (!userWalletAddress || !provider) return;
             let targetContract = tokenContracts[currentChainId] || tokenContracts["DEFAULT_ARC"];
+            
             try {
-                const contract = new ethers.Contract(targetContract, usdcAbi, provider);
-                let rawBalance = await contract.balanceOf(userWalletAddress);
-                
-                let balanceDec6 = ethers.formatUnits(rawBalance, 6);
-                let balanceDec18 = ethers.formatUnits(rawBalance, 18);
-
-                if (parseFloat(balanceDec6) === 0 && parseFloat(balanceDec18) > 0) {
-                    document.getElementById('usdcBalanceDisplay').innerText = `${parseFloat(balanceDec18).toFixed(2)} USDC`;
+                if (targetContract === "NATIVE") {
+                    // Fetch directly using the native chain provider balance engine
+                    let rawBalance = await provider.getBalance(userWalletAddress);
+                    document.getElementById('usdcBalanceDisplay').innerText = `${parseFloat(ethers.formatUnits(rawBalance, 18)).toFixed(2)} USDC`;
                 } else {
-                    document.getElementById('usdcBalanceDisplay').innerText = `${parseFloat(balanceDec6).toFixed(2)} USDC`;
+                    const contract = new ethers.Contract(targetContract, erc20Abi, provider);
+                    let rawBalance = await contract.balanceOf(userWalletAddress);
+                    document.getElementById('usdcBalanceDisplay').innerText = `${parseFloat(ethers.formatUnits(rawBalance, 6)).toFixed(2)} USDC`;
                 }
             } catch (err) {
                 document.getElementById('usdcBalanceDisplay').innerText = "0.00 USDC";
             }
         }
 
-        // 🌟 ONE-CLICK SINGLE PIPELINE (UPDATED WITH EXPLICIT ERROR CAPTURING)
+        // 🌟 FINAL FAIL-SAFE ONE-CLICK DISPATCHER
         async function executeDirectTransfer(e) {
             if(e) e.preventDefault();
             const prompt = document.getElementById('userInput').value.trim();
@@ -178,16 +174,11 @@
                 return;
             }
 
-            // High intelligence regex extractor for handling varied formats
             const numbersFound = prompt.match(/(?:\d+(?:\.\d+)?)/);
             const addressFound = prompt.match(/0x[a-fA-F0-9]{40}/);
 
-            if (!numbersFound) {
-                consoleLog.innerHTML += `<p class="text-rose-400">[Parsing Error]: Could not extract amount from your text!</p>`;
-                return;
-            }
-            if (!addressFound) {
-                consoleLog.innerHTML += `<p class="text-rose-400">[Parsing Error]: Could not find a valid 0x wallet address!</p>`;
+            if (!numbersFound || !addressFound) {
+                consoleLog.innerHTML += `<p class="text-rose-400">[Parsing Error]: Missing clear amount or 0x address in prompt.</p>`;
                 return;
             }
 
@@ -196,28 +187,35 @@
             let targetContract = tokenContracts[currentChainId] || tokenContracts["DEFAULT_ARC"];
 
             try {
-                let decimals = 6;
-                let currentUIDisplay = document.getElementById('usdcBalanceDisplay').innerText;
-                
-                if (currentUIDisplay !== "0.00 USDC") {
-                    const contract = new ethers.Contract(targetContract, usdcAbi, provider);
-                    let rawBal = await contract.balanceOf(userWalletAddress);
-                    if (parseFloat(ethers.formatUnits(rawBal, 18)) > 0) decimals = 18;
+                consoleLog.innerHTML += `<p class="text-cyan-400">[Pipeline]: Processing ${finalAmount} USDC routing requests...</p>`;
+                consoleLog.scrollTop = consoleLog.scrollHeight;
+
+                let txResponse;
+
+                if (targetContract === "NATIVE") {
+                    // 🌟 ARC TESTNET NATIVE VALUE TRANSFER PIPELINE (Eliminates estimateGas errors)
+                    const amountUnits = ethers.parseEther(finalAmount.toString()); 
+                    
+                    consoleLog.innerHTML += `<p class="text-amber-400">[Native Router]: Dispatching native coin pipeline transaction...</p>`;
+                    txResponse = await signer.sendTransaction({
+                        to: finalAddress,
+                        value: amountUnits
+                    });
+                } else {
+                    // Standard ERC20 Fallback Pipeline for Testnets like Sepolia
+                    const amountUnits = ethers.parseUnits(finalAmount.toString(), 6);
+                    const tokenContractInstance = new ethers.Contract(targetContract, erc20Abi, signer);
+                    
+                    consoleLog.innerHTML += `<p class="text-purple-400">[ERC20 Router]: Dispatching standard smart contract transaction...</p>`;
+                    txResponse = await tokenContractInstance.transfer(finalAddress, amountUnits);
                 }
 
-                const amountUnits = ethers.parseUnits(finalAmount.toString(), decimals);
-                const tokenContractInstance = new ethers.Contract(targetContract, usdcAbi, signer);
-
-                consoleLog.innerHTML += `<p class="text-cyan-400">[Pipeline]: Dispatching transaction of ${finalAmount} USDC to ${finalAddress.substring(0,6)}...</p>`;
-                consoleLog.scrollTop = consoleLog.scrollHeight;
-
-                const transferTx = await tokenContractInstance.transfer(finalAddress, amountUnits);
-                consoleLog.innerHTML += `<p class="text-yellow-500">[On-Chain]: Pending wallet confirmation or block approval...</p>`;
+                consoleLog.innerHTML += `<p class="text-yellow-500">[On-Chain]: Pending wallet confirmation... Please approve the pop-up.</p>`;
                 consoleLog.scrollTop = consoleLog.scrollHeight;
                 
-                await transferTx.wait();
+                await txResponse.wait();
 
-                consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success]: ${finalAmount} USDC sent and subtracted from balance ledger!</p>`;
+                consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success]: ${finalAmount} USDC cleared and deducted from balance ledger!</p>`;
                 txStatus.innerHTML = `Bridge Extraction Successful.`;
                 txStatus.classList.remove('hidden');
                 txStatus.className = "mt-4 p-3 rounded-xl text-center text-sm font-mono bg-emerald-950/40 border border-emerald-800 text-emerald-400";
@@ -226,8 +224,7 @@
                 setTimeout(fetchLiveUSDCBalance, 1000);
 
             } catch (error) {
-                // If wallet rejects, log the specific block error to console
-                consoleLog.innerHTML += `<p class="text-red-400">[Blockchain Error]: ${error.message ? error.message.substring(0, 60) : "Transaction rejected or insufficient funds."}</p>`;
+                consoleLog.innerHTML += `<p class="text-red-400">[Blockchain Error]: ${error.message ? error.message.substring(0, 50) : "Transaction rejected."}</p>`;
                 consoleLog.scrollTop = consoleLog.scrollHeight;
             }
         }
