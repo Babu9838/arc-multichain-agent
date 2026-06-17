@@ -11,10 +11,8 @@
 
     <header class="p-6 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-3 w-full sm:w-auto">
-            <div class="h-10 w-10 flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-950 rounded-xl border border-slate-700 shadow-md">
-                <svg viewBox="0 0 400 400" class="w-full h-full text-white fill-current" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M200,40 C110,40 40,110 40,200 C40,265 80,320 135,345 C145,350 155,340 155,330 L155,310 C155,300 148,292 140,287 C95,255 75,200 95,145 C115,95 155,55 205,45 C275,30 335,80 335,150 C335,215 295,275 230,290 C215,293 200,282 200,265 L200,250 C230,250 255,225 255,195 C255,165 230,140 200,140 C170,140 145,165 145,195 C145,215 155,232 170,242 L170,330 C170,355 190,375 215,375 C305,375 375,305 375,215 C375,120 295,40 200,40 Z" />
-                </svg>
+            <div class="h-10 w-10 flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-950 rounded-xl border border-slate-700 shadow-md overflow-hidden">
+                <img src="1000227687.jpg" alt="ARC Logo" class="w-full h-full object-cover">
             </div>
             <h1 class="text-xl font-bold tracking-wider text-cyan-400">ARC MULTICHAIN AGENT</h1>
         </div>
@@ -149,7 +147,6 @@
             
             try {
                 if (targetContract === "NATIVE") {
-                    // Fetch directly using the native chain provider balance engine
                     let rawBalance = await provider.getBalance(userWalletAddress);
                     document.getElementById('usdcBalanceDisplay').innerText = `${parseFloat(ethers.formatUnits(rawBalance, 18)).toFixed(2)} USDC`;
                 } else {
@@ -162,7 +159,6 @@
             }
         }
 
-        // 🌟 FINAL FAIL-SAFE ONE-CLICK DISPATCHER
         async function executeDirectTransfer(e) {
             if(e) e.preventDefault();
             const prompt = document.getElementById('userInput').value.trim();
@@ -193,7 +189,6 @@
                 let txResponse;
 
                 if (targetContract === "NATIVE") {
-                    // 🌟 ARC TESTNET NATIVE VALUE TRANSFER PIPELINE (Eliminates estimateGas errors)
                     const amountUnits = ethers.parseEther(finalAmount.toString()); 
                     
                     consoleLog.innerHTML += `<p class="text-amber-400">[Native Router]: Dispatching native coin pipeline transaction...</p>`;
@@ -202,7 +197,6 @@
                         value: amountUnits
                     });
                 } else {
-                    // Standard ERC20 Fallback Pipeline for Testnets like Sepolia
                     const amountUnits = ethers.parseUnits(finalAmount.toString(), 6);
                     const tokenContractInstance = new ethers.Contract(targetContract, erc20Abi, signer);
                     
