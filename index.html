@@ -9,9 +9,10 @@
 </head>
 <body class="bg-slate-900 text-white font-sans min-h-screen flex flex-col justify-between">
 
+    <!-- Header -->
     <header class="p-6 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div class="flex items-center gap-3 w-full sm:w-auto justify-start">
-            <div class="h-10 w-10 flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-950 rounded-xl border border-slate-700 shadow-md shadow-cyan-500/20 p-1.5">
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+            <div class="h-10 w-10 flex items-center justify-center bg-gradient-to-b from-slate-800 to-slate-950 rounded-xl border border-slate-700 shadow-md">
                 <svg viewBox="0 0 400 400" class="w-full h-full text-white fill-current" xmlns="http://www.w3.org/2000/svg">
                     <path d="M200,40 C110,40 40,110 40,200 C40,265 80,320 135,345 C145,350 155,340 155,330 L155,310 C155,300 148,292 140,287 C95,255 75,200 95,145 C115,95 155,55 205,45 C275,30 335,80 335,150 C335,215 295,275 230,290 C215,293 200,282 200,265 L200,250 C230,250 255,225 255,195 C255,165 230,140 200,140 C170,140 145,165 145,195 C145,215 155,232 170,242 L170,330 C170,355 190,375 215,375 C305,375 375,305 375,215 C375,120 295,40 200,40 Z" />
                 </svg>
@@ -20,20 +21,21 @@
         </div>
         
         <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-            <select id="chainSelector" onchange="updateChainUI(event)" class="bg-slate-800 border border-slate-700 text-xs font-mono rounded-full px-4 py-2 text-cyan-400 focus:outline-none cursor-pointer">
+            <select id="chainSelector" onchange="updateChainUI(event)" class="bg-slate-800 border border-slate-700 text-xs font-mono rounded-full px-4 py-2 text-cyan-400 focus:outline-none">
                 <option value="AUTO" selected>🌀 ARC Testnet / Active Chain</option>
                 <option value="421614">⚡ Arbitrum Sepolia</option>
                 <option value="11155111">🌐 Ethereum Sepolia</option>
             </select>
-
-            <button id="connectBtn" onclick="connectWallet(event)" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2 px-4 rounded-full text-sm font-mono transition duration-200 cursor-pointer whitespace-nowrap">
+            <button id="connectBtn" onclick="connectWallet(event)" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2 px-4 rounded-full text-sm font-mono transition">
                 🦁 Connect Wallet
             </button>
         </div>
     </header>
 
+    <!-- Main Content -->
     <main class="max-w-6xl mx-auto my-auto p-6 w-full grid grid-cols-1 md:grid-cols-3 gap-6">
         
+        <!-- Wallet Status Panel -->
         <div class="bg-slate-800/30 p-6 rounded-2xl border border-slate-800 backdrop-blur-md">
             <h2 class="text-lg font-semibold mb-4 text-emerald-400">📊 Wallet Session</h2>
             <div class="space-y-4 text-sm font-mono">
@@ -56,44 +58,42 @@
             </div>
         </div>
 
+        <!-- Single Action Box -->
         <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700/50 backdrop-blur-md flex flex-col justify-between">
             <div>
                 <h2 class="text-lg font-semibold mb-4 text-slate-200">Talk to Agent</h2>
                 <p class="text-xs text-slate-400 mb-4">Give instructions to routing system:</p>
-                
                 <textarea id="userInput" rows="3" class="w-full p-4 bg-slate-900 border border-slate-700 rounded-xl focus:outline-none focus:border-cyan-400 font-mono text-sm text-white" placeholder="Example: Send 2 USDC to 0xef084f79208db9d282df5470640de93196dc52de"></textarea>
             </div>
             
-            <div class="mt-4 space-y-3">
-                <button id="step1Btn" onclick="approveTokenPipeline(event)" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 px-6 rounded-xl transition duration-200 cursor-pointer text-sm font-mono tracking-wide">
-                    🔑 Step 1: Approve USDC Spend
-                </button>
-                <button id="step2Btn" onclick="executeAgentAction(event)" class="w-full bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold py-3 px-6 rounded-xl transition duration-200 cursor-pointer text-sm font-mono tracking-wide">
-                    🚀 Step 2: Run AI Agent Action
+            <!-- ONE-CLICK DIRECT EXECUTION BUTTON -->
+            <div class="mt-4">
+                <button id="actionBtn" onclick="executeDirectTransfer(event)" class="w-full bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold py-4 px-6 rounded-xl transition duration-200 text-base font-mono tracking-wide">
+                    🚀 Run AI Agent Action (One-Click)
                 </button>
             </div>
         </div>
 
+        <!-- Terminal Console -->
         <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between">
             <div>
                 <h2 class="text-lg font-semibold mb-4 text-cyan-400 font-mono">>_ Agent Output Console</h2>
                 <div id="consoleLog" class="font-mono text-xs text-slate-300 space-y-2 max-h-60 overflow-y-auto">
-                    <p class="text-slate-500">[System]: GitHub Pages Secure Deployment Architecture Initialized.</p>
+                    <p class="text-slate-500">[System]: GitHub Pages Secure Engine Ready.</p>
                 </div>
             </div>
             <div id="txStatus" class="mt-4 p-3 rounded-xl text-center text-sm font-mono hidden"></div>
         </div>
-
     </main>
 
     <footer class="p-4 border-t border-slate-800 text-center text-xs text-slate-500">
         Utilizing Arc Unified Balance Engine & Interchain Bridge Protocol
     </footer>
 
+    <!-- JAVASCRIPT DIRECT ENGINE -->
     <script>
         let provider, signer, userWalletAddress, currentChainId;
 
-        // Configured Testnet & Mainnet Smart Contract Repositories
         const tokenContracts = {
             "5042002": "0x3600000000000000000000000000000000000000",   // ARC Native USDC
             "11155111": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",  // Sepolia USDC
@@ -103,7 +103,6 @@
 
         const usdcAbi = [
             "function balanceOf(address account) view returns (uint256)",
-            "function approve(address spender, uint256 amount) returns (bool)",
             "function transfer(address to, uint256 amount) returns (bool)"
         ];
 
@@ -132,10 +131,10 @@
                     currentChainId = network.chainId.toString();
                     document.getElementById('activeNetworkDisplay').innerText = `Chain ID: ${currentChainId}`;
                     
-                    consoleLog.innerHTML += `<p class="text-emerald-400">[Wallet]: Connection successfully synced.</p>`;
+                    consoleLog.innerHTML += `<p class="text-emerald-400">[Wallet]: Account synced.</p>`;
                     fetchLiveUSDCBalance();
                 } catch (error) {
-                    consoleLog.innerHTML += `<p class="text-red-400">[Error]: Secure handshake denied.</p>`;
+                    consoleLog.innerHTML += `<p class="text-red-400">[Error]: Handshake denied.</p>`;
                 }
             } else {
                 alert("No Web3 Wallet detected!");
@@ -161,7 +160,6 @@
                 const contract = new ethers.Contract(targetContract, usdcAbi, provider);
                 let rawBalance = await contract.balanceOf(userWalletAddress);
                 
-                // Arc Testnet uses 6 decimals for native USDC. Checking 6 and 18 fallback.
                 let balanceDec6 = ethers.formatUnits(rawBalance, 6);
                 let balanceDec18 = ethers.formatUnits(rawBalance, 18);
 
@@ -175,11 +173,12 @@
             }
         }
 
-        // 🌟 STEP 1: APPROVAL ACTION SEQUENCE
-        async function approveTokenPipeline(e) {
+        // 🌟 ONE-CLICK SINGLE PIPELINE (Saves Time & Prevents Revert/Deduction Errors)
+        async function executeDirectTransfer(e) {
             if(e) e.preventDefault();
             const prompt = document.getElementById('userInput').value.toLowerCase();
             const consoleLog = document.getElementById('consoleLog');
+            const txStatus = document.getElementById('txStatus');
 
             if (!userWalletAddress || !signer) {
                 alert("Please connect your wallet first!");
@@ -201,85 +200,37 @@
             try {
                 let decimals = 6;
                 let currentUIDisplay = document.getElementById('usdcBalanceDisplay').innerText;
-                if (currentUIDisplay !== "0.00 USDC") {
-                    const contract = new ethers.Contract(targetContract, usdcAbi, provider);
-                    let rawBal = await contract.balanceOf(userWalletAddress);
-                    if (parseFloat(ethers.formatUnits(rawBal, 18)) > 0) decimals = 18;
-                }
-
-                const amountUnits = ethers.parseUnits(finalAmount.toString(), decimals);
-                const tokenContractInstance = new ethers.Contract(targetContract, usdcAbi, signer);
-
-                consoleLog.innerHTML += `<p class="text-amber-400">[Pipeline 1/2]: Initializing Allowance Protocol... Check Wallet.</p>`;
-                consoleLog.scrollTop = consoleLog.scrollHeight;
-
-                const approveTx = await tokenContractInstance.approve(finalAddress, amountUnits);
-                consoleLog.innerHTML += `<p class="text-purple-400">[Pending]: Confirming allowance block confirmation on-chain...</p>`;
-                await approveTx.wait();
-
-                consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success]: Allocation secured! Proceed to Step 2.</p>`;
-                consoleLog.scrollTop = consoleLog.scrollHeight;
-            } catch (err) {
-                consoleLog.innerHTML += `<p class="text-red-400">[Error]: Approval workflow canceled or aborted.</p>`;
-            }
-        }
-
-        // 🌟 STEP 2: DIRECT TRANSFER & REAL BALANCE EXTRACTOR
-        async function executeAgentAction(e) {
-            if(e) e.preventDefault();
-            const prompt = document.getElementById('userInput').value.toLowerCase();
-            const consoleLog = document.getElementById('consoleLog');
-            const txStatus = document.getElementById('txStatus');
-
-            if (!userWalletAddress || !signer) {
-                alert("Please connect your wallet first!");
-                return;
-            }
-
-            const numbersFound = prompt.match(/\d+/);
-            const addressFound = prompt.match(/0x[a-fA-F0-9]{40}/);
-
-            if (!numbersFound || !addressFound) {
-                alert("Parsing failure. Re-verify target instructions in text field.");
-                return;
-            }
-
-            const finalAmount = parseFloat(numbersFound[0]);
-            const finalAddress = addressFound[0];
-            let targetContract = tokenContracts[currentChainId] || tokenContracts["DEFAULT_ARC"];
-
-            try {
-                let decimals = 6;
-                let currentUIDisplay = document.getElementById('usdcBalanceDisplay').innerText;
-                if (currentUIDisplay !== "0.00 USDC") {
-                    const contract = new ethers.Contract(targetContract, usdcAbi, provider);
-                    let rawBal = await contract.balanceOf(userWalletAddress);
-                    if (parseFloat(ethers.formatUnits(rawBal, 18)) > 0) decimals = 18;
-                }
-
-                const amountUnits = ethers.parseUnits(finalAmount.toString(), decimals);
-                const tokenContractInstance = new ethers.Contract(targetContract, usdcAbi, signer);
-
-                consoleLog.innerHTML += `<p class="text-cyan-400">[Pipeline 2/2]: Sending transfer payload to wallet...</p>`;
-                consoleLog.scrollTop = consoleLog.scrollHeight;
-
-                const transferTx = await tokenContractInstance.transfer(finalAddress, amountUnits);
-                consoleLog.innerHTML += `<p class="text-yellow-500">[On-Chain]: Transacting funds... Polling network confirmation.</p>`;
                 
-                // Wait for the block verification
+                if (currentUIDisplay !== "0.00 USDC") {
+                    const contract = new ethers.Contract(targetContract, usdcAbi, provider);
+                    let rawBal = await contract.balanceOf(userWalletAddress);
+                    if (parseFloat(ethers.formatUnits(rawBal, 18)) > 0) decimals = 18;
+                }
+
+                const amountUnits = ethers.parseUnits(finalAmount.toString(), decimals);
+                const tokenContractInstance = new ethers.Contract(targetContract, usdcAbi, signer);
+
+                consoleLog.innerHTML += `<p class="text-cyan-400">[Pipeline]: Dispatching direct execution payload to ${finalAddress}...</p>`;
+                consoleLog.scrollTop = consoleLog.scrollHeight;
+
+                // Directly calling the standard ERC20 transfer method
+                const transferTx = await tokenContractInstance.transfer(finalAddress, amountUnits);
+                consoleLog.innerHTML += `<p class="text-yellow-500">[On-Chain]: Transacting funds... Pending block confirmation.</p>`;
+                consoleLog.scrollTop = consoleLog.scrollHeight;
+                
                 await transferTx.wait();
 
-                consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success]: ${finalAmount} USDC successfully deducted on-chain!</p>`;
+                consoleLog.innerHTML += `<p class="text-emerald-400 font-bold">[Success]: ${finalAmount} USDC cleared and deducted from balance ledger!</p>`;
                 txStatus.innerHTML = `Bridge Extraction Successful.`;
                 txStatus.classList.remove('hidden');
                 txStatus.className = "mt-4 p-3 rounded-xl text-center text-sm font-mono bg-emerald-950/40 border border-emerald-800 text-emerald-400";
                 consoleLog.scrollTop = consoleLog.scrollHeight;
 
-                // Instantly re-fetch from the blockchain to update UI with real remaining balance
+                // Instantly re-fetch the new remaining balance from blockchain
                 setTimeout(fetchLiveUSDCBalance, 1000);
 
             } catch (error) {
-                consoleLog.innerHTML += `<p class="text-red-400">[Error]: Deduction failed. Verify Step 1 was correctly executed first.</p>`;
+                consoleLog.innerHTML += `<p class="text-red-400">[Error]: Direct execution failed or rejected by user.</p>`;
                 consoleLog.scrollTop = consoleLog.scrollHeight;
             }
         }
