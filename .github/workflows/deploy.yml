@@ -12,21 +12,22 @@ jobs:
       RPC_URL: ${{ secrets.RPC_URL }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
 
       - name: Install forge-std
-        run: |
-          forge install foundry-rs/forge-std 
+        run: forge install foundry-rs/forge-std
 
       - name: Build
         run: forge build
 
       - name: Deploy
-  run: |
-    forge script script/Deploy.s.sol:Deploy \
-      --rpc-url $RPC_URL \
-      --private-key $PRIVATE_KEY \
-      --broadcast \
-      -vvvv
+        run: |
+          forge script script/Deploy.s.sol:Deploy \
+            --rpc-url $RPC_URL \
+            --private-key $PRIVATE_KEY \
+            --broadcast \
+            -vvvv
