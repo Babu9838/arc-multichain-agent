@@ -12,16 +12,13 @@ jobs:
       RPC_URL: ${{ secrets.RPC_URL }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+      - uses: foundry-rs/foundry-toolchain@v1
 
-      - name: Install Dependencies
-  run: |
-    forge install foundry-rs/forge-std --no-commit 
-    
+      - name: Install forge-std
+        run: |
+          forge install foundry-rs/forge-std --no-commit
 
       - name: Build
         run: forge build
@@ -29,6 +26,6 @@ jobs:
       - name: Deploy
         run: |
           forge script script/Deploy.s.sol:Deploy \
-          --rpc-url $RPC_URL \
-          --private-key $PRIVATE_KEY \
-          --broadcast
+            --rpc-url $RPC_URL \
+            --private-key $PRIVATE_KEY \
+            --broadcast
